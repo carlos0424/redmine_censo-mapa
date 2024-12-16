@@ -1,16 +1,9 @@
 /**
- * censo_mapa.js
- * Versión: 1.1.0
- * Autor: Carlos Arbelaez
- * 
- * Este script maneja la funcionalidad del mapa de censos, incluyendo:
- * - Inicialización del mapa usando OpenStreetMap
- * - Gestión de marcadores y popups
- * - Sistema de filtrado por múltiples criterios
- * - Manejo de estados y colores de marcadores
- * - Gestión de mensajes de error
- * - Adaptación responsive
- */
+* censo_mapa.js
+* Plugin para visualización de mapas de censo
+* Autor: Carlos Arbelaez
+* Versión: 1.1.0
+*/
 
 document.addEventListener('DOMContentLoaded', function() {
     // Variables globales
@@ -19,15 +12,16 @@ document.addEventListener('DOMContentLoaded', function() {
     let currentAlertMessage = null;
     
     /**
-     * Inicializa el mapa y sus configuraciones básicas
+     * Inicializa el mapa con la configuración básica
      */
     function initMap() {
+        console.log('Iniciando mapa...');
         const mapElement = document.getElementById('censo-map');
         if (!mapElement) {
             console.error('Elemento del mapa no encontrado');
             return;
         }
-
+ 
         try {
             // Configuración inicial del mapa
             map = L.map('censo-map', {
@@ -37,30 +31,29 @@ document.addEventListener('DOMContentLoaded', function() {
                 maxZoom: 19
             }).setView([4.5709, -74.2973], 13);
             
-            // Agregar capa de OpenStreetMap
+            // Añadir capa de OpenStreetMap
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 maxZoom: 19,
                 attribution: '© OpenStreetMap contributors'
             }).addTo(map);
-
-            // Configurar controles
+ 
             map.zoomControl.setPosition('topright');
             markersLayer = L.layerGroup().addTo(map);
-
+ 
             // Cargar marcadores iniciales
-            if (typeof mapMarkers !== 'undefined' && mapMarkers && mapMarkers.length > 0) {
-                console.log('Cargando marcadores iniciales:', mapMarkers.length);
+            console.log('Cargando marcadores iniciales:', mapMarkers);
+            if (mapMarkers && mapMarkers.length > 0) {
                 displayMarkers(mapMarkers);
             } else {
                 console.log('No hay marcadores para mostrar');
                 updateCounter(0);
             }
-
-            // Ajustar tamaño después de la carga
+ 
+            // Ajustar tamaño del mapa
             setTimeout(() => {
                 map.invalidateSize();
             }, 100);
-
+ 
         } catch (error) {
             console.error('Error al inicializar el mapa:', error);
             showErrorMessage('Error al cargar el mapa. Por favor, recarga la página.');
@@ -86,25 +79,27 @@ document.addEventListener('DOMContentLoaded', function() {
                 const lng = parseFloat(markerData.lng);
                 
                 if (isNaN(lat) || isNaN(lng)) {
-                    console.warn('Marcador sin coordenadas válidas:', markerData);
+                    console.warn('Coordenadas inválidas:', markerData);
                     return;
                 }
                 
                 validMarkersCount++;
-
-                // Determinar color basado en el estado (ID 12 = Rechazado)
-                const isRejected = String(markerData.status_id) === "12";
+ 
+                // Determinar color según el estado (ID 12 = Rechazó Interventoría)
+                console.log('Estado del marcador:', markerData.status_id);
+                const isRejected = markerData.status_id === "12";
+                const markerColor = isRejected ? 
+                    {fillColor: "#e74c3c", color: "#c0392b"} : 
+                    {fillColor: "#3498db", color: "#2980b9"};
                 
-                const markerOptions = {
+                const marker = L.circleMarker([lat, lng], {
                     radius: 8,
-                    fillColor: isRejected ? "#e74c3c" : "#3498db", // Rojo para rechazados, azul para otros
-                    color: isRejected ? "#c0392b" : "#2980b9",
+                    fillColor: markerColor.fillColor,
+                    color: markerColor.color,
                     weight: 2,
                     opacity: 1,
                     fillOpacity: 0.8
-                };
-
-                const marker = L.circleMarker([lat, lng], markerOptions);
+                });
                 
                 // Contenido del popup
                 const popupContent = `
@@ -117,27 +112,22 @@ document.addEventListener('DOMContentLoaded', function() {
                             <div class="info-row"><span class="label">Estado:</span> ${escapeHtml(markerData.status || 'No especificado')}</div>
                         </div>
                         <div class="marker-actions">
-                            <a href="https://www.google.com/maps?q=${lat},${lng}" target="_blank" class="marker-button location-button">
-                                <i class="icon-location"></i>
+                            <a href="https://www.google.com/maps?q=${lat},${lng}" target="_blank" class="marker-button">
                                 Obtener ubicación
                             </a>
-                            <a href="/issues/${markerData.id}" class="marker-button view-button">
-                                <i class="icon-doc"></i>
+                            <a href="/issues/${markerData.id}" class="marker-button">
                                 Ver Censo
                             </a>
                         </div>
                     </div>
                 `;
                 
-                marker.bindPopup(popupContent, {
-                    maxWidth: 300,
-                    minWidth: 200
-                });
-                
+                marker.bindPopup(popupContent);
                 marker.addTo(markersLayer);
                 bounds.extend([lat, lng]);
             });
             
+            // Ajustar vista del mapa a los marcadores
             if (validMarkersCount > 0 && bounds.isValid()) {
                 map.fitBounds(bounds, {
                     padding: [50, 50],
@@ -152,7 +142,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     /**
      * Actualiza el contador de censos
-     * @param {number} count - Número de censos a mostrar
+     * @param {number} count - Número de censos
      */
     function updateCounter(count) {
         const counterElement = document.getElementById('censo-counter');
@@ -163,16 +153,15 @@ document.addEventListener('DOMContentLoaded', function() {
     
     /**
      * Muestra mensajes de error
-     * @param {string} message - Mensaje de error a mostrar
+     * @param {string} message - Mensaje a mostrar
      */
     function showErrorMessage(message) {
         if (currentAlertMessage) {
             currentAlertMessage.remove();
         }
-
+ 
         const errorDiv = document.createElement('div');
         errorDiv.className = 'alert alert-error';
-        errorDiv.style.cssText = 'margin:10px;padding:10px;background:#fee;border:1px solid #fcc;border-radius:4px;color:#333;';
         errorDiv.textContent = message;
         
         const mapElement = document.getElementById('censo-map');
@@ -180,7 +169,8 @@ document.addEventListener('DOMContentLoaded', function() {
             mapElement.parentNode.insertBefore(errorDiv, mapElement);
             currentAlertMessage = errorDiv;
         }
-
+ 
+        // Auto-ocultar mensaje después de 5 segundos
         setTimeout(() => {
             if (errorDiv && errorDiv.parentNode) {
                 errorDiv.remove();
@@ -191,8 +181,6 @@ document.addEventListener('DOMContentLoaded', function() {
     
     /**
      * Escapa caracteres HTML para prevenir XSS
-     * @param {string} unsafe - Texto a escapar
-     * @returns {string} Texto escapado
      */
     function escapeHtml(unsafe) {
         if (!unsafe) return '';
@@ -213,7 +201,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const buildingTypeFilter = document.getElementById('building-type-filter').value.trim();
             const addressFilter = document.getElementById('address-filter').value.trim().toLowerCase();
             const censusNumberFilter = document.getElementById('title-filter').value.trim();
-            const statusFilter = document.getElementById('status-filter')?.value.trim();
+            const statusFilter = document.getElementById('status-filter').value.trim();
             
             console.log('Aplicando filtros:', {
                 location: locationFilter,
@@ -222,16 +210,37 @@ document.addEventListener('DOMContentLoaded', function() {
                 censusNumber: censusNumberFilter,
                 status: statusFilter
             });
-
+ 
             const filteredMarkers = mapMarkers.filter(marker => {
-                const locationMatch = !locationFilter || (marker.location && marker.location === locationFilter);
-                const buildingTypeMatch = !buildingTypeFilter || (marker.building_type && marker.building_type === buildingTypeFilter);
-                const addressMatch = !addressFilter || (marker.address && marker.address.toLowerCase().includes(addressFilter));
-                const censusMatch = !censusNumberFilter || (marker.id && marker.id.toString() === censusNumberFilter);
-                const statusMatch = !statusFilter || (marker.status_id && marker.status_id.toString() === statusFilter);
+                // Verificar cada filtro solo si tiene un valor
+                const locationMatch = !locationFilter || 
+                    (marker.location && marker.location === locationFilter);
                 
-                return locationMatch && buildingTypeMatch && addressMatch && censusMatch && statusMatch;
+                const buildingTypeMatch = !buildingTypeFilter || 
+                    (marker.building_type && marker.building_type === buildingTypeFilter);
+                
+                const addressMatch = !addressFilter || 
+                    (marker.address && marker.address.toLowerCase().includes(addressFilter));
+                
+                const censusMatch = !censusNumberFilter || 
+                    (marker.id && marker.id.toString() === censusNumberFilter);
+                
+                const statusMatch = !statusFilter || 
+                    (marker.status_id && marker.status_id === statusFilter);
+ 
+                console.log('Evaluando marcador:', marker.id, {
+                    locationMatch,
+                    buildingTypeMatch,
+                    addressMatch,
+                    censusMatch,
+                    statusMatch
+                });
+                
+                return locationMatch && buildingTypeMatch && addressMatch && 
+                       censusMatch && statusMatch;
             });
+            
+            console.log('Marcadores filtrados:', filteredMarkers.length);
             
             if (filteredMarkers.length === 0) {
                 showErrorMessage('No se encontraron resultados para los filtros aplicados.');
@@ -250,7 +259,15 @@ document.addEventListener('DOMContentLoaded', function() {
      */
     window.resetFilters = function() {
         try {
-            const filtersToReset = ['location-filter', 'building-type-filter', 'address-filter', 'title-filter', 'status-filter'];
+            // Limpiar todos los campos de filtro
+            const filtersToReset = [
+                'location-filter', 
+                'building-type-filter', 
+                'address-filter', 
+                'title-filter',
+                'status-filter'
+            ];
+            
             filtersToReset.forEach(filterId => {
                 const element = document.getElementById(filterId);
                 if (element) {
@@ -258,22 +275,25 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
             
+            // Limpiar mensajes de error
             if (currentAlertMessage) {
                 currentAlertMessage.remove();
                 currentAlertMessage = null;
             }
             
-            if (mapMarkers && mapMarkers.length > 0) {
-                displayMarkers(mapMarkers);
-            }
+            // Mostrar todos los marcadores
+            displayMarkers(mapMarkers);
             
         } catch (error) {
             console.error('Error al resetear filtros:', error);
             showErrorMessage('Error al resetear los filtros.');
         }
     };
-
-    // Manejador de redimensionamiento con debounce
+ 
+    // Inicializar mapa
+    initMap();
+ 
+    // Manejar redimensionamiento de ventana
     let resizeTimeout;
     window.addEventListener('resize', function() {
         clearTimeout(resizeTimeout);
@@ -283,7 +303,4 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }, 250);
     });
-
-    // Inicializar mapa
-    initMap();
-});
+ });
