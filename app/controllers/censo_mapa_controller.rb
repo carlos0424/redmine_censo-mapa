@@ -1,3 +1,4 @@
+# app/controllers/censo_mapa_controller.rb
 class CensoMapaController < ApplicationController
     before_action :find_project
     before_action :authorize
@@ -8,15 +9,13 @@ class CensoMapaController < ApplicationController
                      .where(tracker_id: 9)
                      .includes(:custom_values, :status)
   
-      # Obtener valores únicos para los filtros de localidad
-      @unique_locations = CustomValue.where(custom_field_id: 102)
-                                   .where(customized_id: @issues.pluck(:id))
-                                   .distinct.pluck(:value).compact.sort
+      # Obtener las listas de los campos personalizados
+      @localidad_field = CustomField.find(102)
+      @tipo_predio_field = CustomField.find(106)
       
-      # Obtener valores únicos para los filtros de tipo de predio
-      @unique_types = CustomValue.where(custom_field_id: 106)
-                                .where(customized_id: @issues.pluck(:id))
-                                .distinct.pluck(:value).compact.sort
+      # Obtener las opciones de las listas
+      @localidades = @localidad_field.possible_values
+      @tipos_predio = @tipo_predio_field.possible_values
   
       # Configurar variables para la vista
       @custom_field_ids = {

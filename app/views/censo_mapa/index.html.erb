@@ -8,30 +8,35 @@
   <div class="censo-mapa-container">
     <div class="censo-mapa-header">
       <div class="censo-mapa-filters">
-        <div class="filter-group">
-          <label>Localidad:</label>
-          <select id="location-filter" class="filter-select">
-            <option value="">Todas</option>
-            <% @unique_locations.each do |location| %>
-              <option value="<%= location %>"><%= location %></option>
-            <% end %>
-          </select>
-        </div>
-  
-        <div class="filter-group">
-          <label>Tipo de Predio:</label>
-          <select id="building-type-filter" class="filter-select">
-            <option value="">Todos</option>
-            <% @unique_types.each do |type| %>
-              <option value="<%= type %>"><%= type %></option>
-            <% end %>
-          </select>
-        </div>
-  
-        <div class="filter-group">
-          <label>Dirección:</label>
-          <input type="text" id="address-filter" class="filter-input" placeholder="Buscar...">
-        </div>
+      <div class="filter-group">
+      <label>Localidad:</label>
+      <select id="location-filter" class="filter-select">
+        <option value="">Todas</option>
+        <% @localidades.each do |loc| %>
+          <option value="<%= loc %>"><%= loc %></option>
+        <% end %>
+      </select>
+    </div>
+    
+    <div class="filter-group">
+      <label>Tipo de Predio:</label>
+      <select id="building-type-filter" class="filter-select">
+        <option value="">Todos</option>
+        <% @tipos_predio.each do |tipo| %>
+          <option value="<%= tipo %>"><%= tipo %></option>
+        <% end %>
+      </select>
+    </div>
+    
+    <div class="filter-group">
+      <label>Dirección:</label>
+      <input type="text" id="address-filter" class="filter-input" placeholder="Buscar por dirección...">
+    </div>
+    
+    <div class="filter-group">
+      <label>Numero Censo:</label>
+      <input type="text" id="title-filter" class="filter-input" placeholder="Buscar por nombre...">
+    </div>
   
         <div class="filter-actions">
           <button onclick="applyFilters()" class="filter-button">
