@@ -1,0 +1,175 @@
+.censo-mapa-container {
+    position: relative;
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 60px);
+    background: #fff;
+  }
+  
+  .censo-mapa-header {
+    position: relative;
+    z-index: 1000;
+    padding: 15px;
+    background: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  }
+  
+  .censo-mapa-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  
+  .filter-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 200px;
+  }
+  
+  .filter-group label {
+    font-weight: 600;
+    white-space: nowrap;
+    color: #2c3e50;
+  }
+  
+  .filter-select,
+  .filter-input {
+    flex: 1;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    min-width: 180px;
+    font-size: 13px;
+  }
+  
+  .filter-select:focus,
+  .filter-input:focus {
+    border-color: #3498db;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(52,152,219,0.2);
+  }
+  
+  .filter-actions {
+    display: flex;
+    gap: 10px;
+  }
+  
+  .filter-button {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    background: #3498db;
+    color: white;
+    font-weight: 500;
+    transition: all 0.2s ease;
+  }
+  
+  .filter-button:hover {
+    background: #2980b9;
+  }
+  
+  .filter-button.reset {
+    background: #e74c3c;
+  }
+  
+  .filter-button.reset:hover {
+    background: #c0392b;
+  }
+  
+  .button-icon {
+    width: 16px;
+    height: 16px;
+  }
+  
+  .censo-count {
+    padding: 8px 12px;
+    background: #edf2f7;
+    border-radius: 4px;
+    font-weight: bold;
+    color: #2c3e50;
+    text-align: right;
+  }
+  
+  #censo-map {
+    flex: 1;
+    width: 100%;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+  
+  .marker-info {
+    padding: 10px;
+    font-size: 13px;
+  }
+  
+  .marker-info h3 {
+    margin: 0 0 10px 0;
+    color: #2c3e50;
+    font-size: 15px;
+    font-weight: 600;
+    border-bottom: 2px solid #3498db;
+    padding-bottom: 4px;
+  }
+  
+  .marker-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+  }
+  
+  .marker-actions a {
+    padding: 6px 12px;
+    background: #3498db;
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+    font-size: 12px;
+    transition: background-color 0.2s;
+  }
+  
+  .marker-actions a:hover {
+    background: #2980b9;
+  }
+  
+  @media (max-width: 768px) {
+    .censo-mapa-container {
+      height: calc(100vh - 100px);
+    }
+  
+    .censo-mapa-filters {
+      flex-direction: column;
+      gap: 15px;
+    }
+  
+    .filter-group {
+      width: 100%;
+    }
+  
+    .filter-select,
+    .filter-input {
+      width: 100%;
+    }
+  
+    .filter-actions {
+      width: 100%;
+      justify-content: space-between;
+    }
+  
+    .filter-button {
+      flex: 1;
+    }
+  
+    .censo-count {
+      text-align: center;
+      margin-top: 10px;
+    }
+  }
