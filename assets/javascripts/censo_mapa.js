@@ -1,8 +1,26 @@
+/**
+ * censo_mapa.js
+ * Versión: 1.1.0
+ * Autor: Carlos Arbelaez
+ * 
+ * Este script maneja la funcionalidad del mapa de censos, incluyendo:
+ * - Inicialización del mapa usando OpenStreetMap
+ * - Gestión de marcadores y popups
+ * - Sistema de filtrado por múltiples criterios
+ * - Manejo de estados y colores de marcadores
+ * - Gestión de mensajes de error
+ * - Adaptación responsive
+ */
+
 document.addEventListener('DOMContentLoaded', function() {
+    // Variables globales
     let map;
     let markersLayer;
     let currentAlertMessage = null;
     
+    /**
+     * Inicializa el mapa y sus configuraciones básicas
+     */
     function initMap() {
         const mapElement = document.getElementById('censo-map');
         if (!mapElement) {
@@ -11,6 +29,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         try {
+            // Configuración inicial del mapa
             map = L.map('censo-map', {
                 zoomControl: true,
                 scrollWheelZoom: true,
@@ -18,22 +37,26 @@ document.addEventListener('DOMContentLoaded', function() {
                 maxZoom: 19
             }).setView([4.5709, -74.2973], 13);
             
+            // Agregar capa de OpenStreetMap
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 maxZoom: 19,
                 attribution: '© OpenStreetMap contributors'
             }).addTo(map);
 
+            // Configurar controles
             map.zoomControl.setPosition('topright');
             markersLayer = L.layerGroup().addTo(map);
 
-            // Verificar y mostrar marcadores iniciales
+            // Cargar marcadores iniciales
             if (typeof mapMarkers !== 'undefined' && mapMarkers && mapMarkers.length > 0) {
+                console.log('Cargando marcadores iniciales:', mapMarkers.length);
                 displayMarkers(mapMarkers);
             } else {
                 console.log('No hay marcadores para mostrar');
                 updateCounter(0);
             }
 
+            // Ajustar tamaño después de la carga
             setTimeout(() => {
                 map.invalidateSize();
             }, 100);
@@ -44,6 +67,10 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
+    /**
+     * Muestra los marcadores en el mapa
+     * @param {Array} markersToShow - Array de marcadores a mostrar
+     */
     function displayMarkers(markersToShow) {
         if (!markersLayer) return;
         
@@ -64,12 +91,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
                 
                 validMarkersCount++;
+
+                // Determinar color basado en el estado (ID 12 = Rechazado)
                 const isRejected = String(markerData.status_id) === "12";
                 
                 const markerOptions = {
                     radius: 8,
-                    fillColor: isRejected ? "#ff0000" : "#3498db",
-                    color: isRejected ? "#cc0000" : "#2980b9",
+                    fillColor: isRejected ? "#e74c3c" : "#3498db", // Rojo para rechazados, azul para otros
+                    color: isRejected ? "#c0392b" : "#2980b9",
                     weight: 2,
                     opacity: 1,
                     fillOpacity: 0.8
@@ -77,6 +106,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 const marker = L.circleMarker([lat, lng], markerOptions);
                 
+                // Contenido del popup
                 const popupContent = `
                     <div class="marker-info">
                         <h3>Censo #${markerData.id}</h3>
@@ -87,10 +117,12 @@ document.addEventListener('DOMContentLoaded', function() {
                             <div class="info-row"><span class="label">Estado:</span> ${escapeHtml(markerData.status || 'No especificado')}</div>
                         </div>
                         <div class="marker-actions">
-                            <a href="https://www.google.com/maps?q=${lat},${lng}" target="_blank" class="marker-button">
+                            <a href="https://www.google.com/maps?q=${lat},${lng}" target="_blank" class="marker-button location-button">
+                                <i class="icon-location"></i>
                                 Obtener ubicación
                             </a>
-                            <a href="/issues/${markerData.id}" class="marker-button">
+                            <a href="/issues/${markerData.id}" class="marker-button view-button">
+                                <i class="icon-doc"></i>
                                 Ver Censo
                             </a>
                         </div>
@@ -118,6 +150,10 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
+    /**
+     * Actualiza el contador de censos
+     * @param {number} count - Número de censos a mostrar
+     */
     function updateCounter(count) {
         const counterElement = document.getElementById('censo-counter');
         if (counterElement) {
@@ -125,6 +161,10 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
+    /**
+     * Muestra mensajes de error
+     * @param {string} message - Mensaje de error a mostrar
+     */
     function showErrorMessage(message) {
         if (currentAlertMessage) {
             currentAlertMessage.remove();
@@ -149,6 +189,11 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 5000);
     }
     
+    /**
+     * Escapa caracteres HTML para prevenir XSS
+     * @param {string} unsafe - Texto a escapar
+     * @returns {string} Texto escapado
+     */
     function escapeHtml(unsafe) {
         if (!unsafe) return '';
         return unsafe
@@ -159,18 +204,23 @@ document.addEventListener('DOMContentLoaded', function() {
             .replace(/'/g, "&#039;");
     }
     
+    /**
+     * Aplica los filtros seleccionados
+     */
     window.applyFilters = function() {
         try {
             const locationFilter = document.getElementById('location-filter').value.trim();
             const buildingTypeFilter = document.getElementById('building-type-filter').value.trim();
             const addressFilter = document.getElementById('address-filter').value.trim().toLowerCase();
             const censusNumberFilter = document.getElementById('title-filter').value.trim();
+            const statusFilter = document.getElementById('status-filter')?.value.trim();
             
             console.log('Aplicando filtros:', {
                 location: locationFilter,
                 buildingType: buildingTypeFilter,
                 address: addressFilter,
-                censusNumber: censusNumberFilter
+                censusNumber: censusNumberFilter,
+                status: statusFilter
             });
 
             const filteredMarkers = mapMarkers.filter(marker => {
@@ -178,11 +228,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 const buildingTypeMatch = !buildingTypeFilter || (marker.building_type && marker.building_type === buildingTypeFilter);
                 const addressMatch = !addressFilter || (marker.address && marker.address.toLowerCase().includes(addressFilter));
                 const censusMatch = !censusNumberFilter || (marker.id && marker.id.toString() === censusNumberFilter);
+                const statusMatch = !statusFilter || (marker.status_id && marker.status_id.toString() === statusFilter);
                 
-                return locationMatch && buildingTypeMatch && addressMatch && censusMatch;
+                return locationMatch && buildingTypeMatch && addressMatch && censusMatch && statusMatch;
             });
-            
-            console.log('Marcadores filtrados:', filteredMarkers.length);
             
             if (filteredMarkers.length === 0) {
                 showErrorMessage('No se encontraron resultados para los filtros aplicados.');
@@ -196,9 +245,12 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     };
     
+    /**
+     * Resetea todos los filtros
+     */
     window.resetFilters = function() {
         try {
-            const filtersToReset = ['location-filter', 'building-type-filter', 'address-filter', 'title-filter'];
+            const filtersToReset = ['location-filter', 'building-type-filter', 'address-filter', 'title-filter', 'status-filter'];
             filtersToReset.forEach(filterId => {
                 const element = document.getElementById(filterId);
                 if (element) {
@@ -221,7 +273,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     };
 
-    // Manejador de redimensionamiento
+    // Manejador de redimensionamiento con debounce
     let resizeTimeout;
     window.addEventListener('resize', function() {
         clearTimeout(resizeTimeout);

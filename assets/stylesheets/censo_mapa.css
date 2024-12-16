@@ -1,4 +1,17 @@
-/* assets/stylesheets/censo_mapa.css */
+/**
+* censo_mapa.css
+* Versión: 1.1.0
+* Autor: Carlos Arbelaez
+* 
+* Estilos para el plugin de mapa de censos
+* - Estructura principal y contenedores
+* - Filtros y controles
+* - Estilos del mapa y marcadores
+* - Popups y ventanas de información
+* - Diseño responsive
+*/
+
+/* Contenedor principal */
 .censo-mapa-container {
     position: relative;
     margin: 10px;
@@ -10,6 +23,7 @@
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
  }
  
+ /* Cabecera y filtros */
  .censo-mapa-header {
     position: relative;
     z-index: 1000;
@@ -27,6 +41,7 @@
     margin-bottom: 10px;
  }
  
+ /* Grupos de filtros */
  .filter-group {
     display: flex;
     align-items: center;
@@ -41,6 +56,7 @@
     min-width: 80px;
  }
  
+ /* Controles de entrada */
  .filter-select,
  .filter-input {
     flex: 1;
@@ -62,6 +78,7 @@
     box-shadow: 0 0 0 2px rgba(52,152,219,0.2);
  }
  
+ /* Botones de acción */
  .filter-actions {
     display: flex;
     gap: 10px;
@@ -81,26 +98,34 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    gap: 8px;
+    color: #fff;
  }
  
  .filter-button:not(.reset) {
-    background: #27ae60;
-    color: white;
+    background: #2ecc71;
  }
  
  .filter-button:not(.reset):hover {
-    background: #219a52;
+    background: #27ae60;
  }
  
  .filter-button.reset {
     background: #e74c3c;
-    color: white;
  }
  
  .filter-button.reset:hover {
     background: #c0392b;
  }
  
+ /* Iconos en botones */
+ .button-icon {
+    width: 16px;
+    height: 16px;
+    fill: currentColor;
+ }
+ 
+ /* Contador de censos */
  .censo-count {
     padding: 10px;
     background: #edf2f7;
@@ -111,6 +136,7 @@
     margin-top: 10px;
  }
  
+ /* Contenedor del mapa */
  #censo-map {
     flex: 1;
     width: 100%;
@@ -118,7 +144,7 @@
     border-radius: 0 0 8px 8px;
  }
  
- /* Estilos del popup */
+ /* Estilos de popups */
  .leaflet-popup-content {
     margin: 0 !important;
     padding: 0 !important;
@@ -147,6 +173,7 @@
  .marker-info-content .info-row {
     margin: 4px 0;
     line-height: 1.3;
+    color: #333;
  }
  
  .marker-info-content .label {
@@ -155,6 +182,7 @@
     margin-right: 4px;
  }
  
+ /* Botones en popups */
  .marker-actions {
     display: flex;
     gap: 6px;
@@ -172,26 +200,31 @@
     font-size: 11px;
     font-weight: 500;
     transition: all 0.2s ease;
-    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
  }
  
- .marker-actions a:first-child {
-    background: #f39c12;
+ .marker-button.location-button {
+    background: #f8c291;
+    color: #44270e;
  }
  
- .marker-actions a:first-child:hover {
-    background: #d68910;
+ .marker-button.location-button:hover {
+    background: #f5ab6e;
  }
  
- .marker-actions a:last-child {
-    background: #9b59b6;
+ .marker-button.view-button {
+    background: #a8e6cf;
+    color: #1b4332;
  }
  
- .marker-actions a:last-child:hover {
-    background: #8e44ad;
+ .marker-button.view-button:hover {
+    background: #8ddfc4;
  }
  
- /* Alertas */
+ /* Alertas y mensajes */
  .alert {
     padding: 10px 12px;
     margin: 10px;
@@ -211,7 +244,7 @@
     to { opacity: 1; }
  }
  
- /* Ajustes responsivos */
+ /* Ajustes responsive */
  @media (max-width: 768px) {
     .censo-mapa-container {
         margin: 5px;
@@ -296,8 +329,30 @@
     border-radius: 4px !important;
  }
  
- /* Estilos específicos para los marcadores */
- .marker-icon {
-    border: 2px solid #fff;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+ /* Iconos personalizados */
+ .icon-search,
+ .icon-reset,
+ .icon-location,
+ .icon-doc {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    background-size: contain;
+    background-repeat: no-repeat;
+ }
+ 
+ .icon-search {
+    background-image: url('../images/search.png');
+ }
+ 
+ .icon-reset {
+    background-image: url('../images/reset.png');
+ }
+ 
+ .icon-location {
+    background-image: url('../images/location.png');
+ }
+ 
+ .icon-doc {
+    background-image: url('../images/document.png');
  }
