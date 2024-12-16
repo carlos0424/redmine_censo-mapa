@@ -23,3 +23,11 @@ Plugin desarrollado para visualizar en mapa las ubicaciones de los censos regist
 ```bash
 cd /path/to/redmine/plugins
 git clone https://github.com/carlos0424/redmine_censo_mapa.git
+
+![image](https://github.com/user-attachments/assets/7210ff0c-9361-4eea-a6d2-86c34b14b9b8)
+
+![image](https://github.com/user-attachments/assets/04c393be-a099-40e0-bb1a-ce32fee89a75)
+
+![image](https://github.com/user-attachments/assets/81cb5367-4f57-461a-9c9a-bd66cafa9a2d)
+
+
