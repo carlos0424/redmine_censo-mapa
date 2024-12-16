@@ -16,6 +16,10 @@ class CensoMapaController < ApplicationController
       # Obtener las opciones de las listas
       @localidades = @localidad_field.possible_values
       @tipos_predio = @tipo_predio_field.possible_values
+
+      # Obtener estados disponibles
+      @available_statuses = IssueStatus.where(id: @issues.pluck(:status_id).uniq)
+
   
       # Configurar variables para la vista
       @custom_field_ids = {

@@ -37,6 +37,16 @@
       <label>Numero Censo:</label>
       <input type="text" id="title-filter" class="filter-input" placeholder="Buscar por nombre...">
     </div>
+
+    <div class="filter-group">
+     <label>Estado:</label>
+     <select id="status-filter" class="filter-select">
+      <option value="">Todos</option>
+         <% @available_statuses.each do |status| %>
+             <option value="<%= status.id %>"><%= status.name %></option>
+         <% end %>
+      </select>
+    </div>
   
         <div class="filter-actions">
           <button onclick="applyFilters()" class="filter-button">

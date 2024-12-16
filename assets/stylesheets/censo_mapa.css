@@ -43,14 +43,16 @@
    
    .filter-select,
    .filter-input {
-    flex: 1;
-    padding: 8px 12px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    min-width: 180px;
-    font-size: 13px;
-    color: #333;
-    background-color: #fff;
+     flex: 1;
+     padding: 8px 12px;
+     border: 1px solid #ddd;
+     border-radius: 4px;
+     min-width: 180px;
+     font-size: 13px;
+     color: #333;
+     background-color: #fff;
+     height: 35px; /* Aumentamos la altura */
+     line-height: normal; /* Ajustamos line-height */
    }
    
    .filter-select:focus,
@@ -242,10 +244,12 @@
     }
    
     .filter-group {
-      width: 100%;
-      flex-direction: column;
-      align-items: flex-start;
-    }
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        min-width: 200px;
+        height: 35px; /* Aseguramos altura consistente */
+      }
    
     .filter-group label {
       margin-bottom: 4px;

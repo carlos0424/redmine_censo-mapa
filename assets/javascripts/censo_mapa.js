@@ -69,16 +69,17 @@ document.addEventListener('DOMContentLoaded', function() {
           
           validMarkersCount++;
   
-          // Determinar color basado en el estado
-          const markerColor = markerData.status_id === 12 ? {
-            fillColor: "#e74c3c",  // Rojo para Rechazo interventoría
-            color: "#c0392b",
-            fillOpacity: 0.8
-          } : {
-            fillColor: "#3498db",  // Azul para otros estados
-            color: "#2980b9",
-            fillOpacity: 0.8
-          };
+    // Verificar el estado de rechazo (ID 12)
+    const isRejected = parseInt(markerData.status_id) === 12;
+    const markerColor = isRejected ? {
+      fillColor: "#e74c3c",
+      color: "#c0392b",
+      fillOpacity: 0.8
+    } : {
+      fillColor: "#3498db",
+      color: "#2980b9",
+      fillOpacity: 0.8
+    };
           
           const marker = L.circleMarker([lat, lng], {
             radius: 8,
@@ -90,25 +91,24 @@ document.addEventListener('DOMContentLoaded', function() {
           });
           
           const popupContent = `
-            <div class="marker-info">
-              <h3>${escapeHtml(markerData.title || 'Sin título')}</h3>
-              <div class="marker-info-content">
-                <div><strong class="marker-label">Localidad:</strong> ${escapeHtml(markerData.location || 'No especificada')}</div>
-                <div><strong class="marker-label">Dirección:</strong> ${escapeHtml(markerData.address || 'No especificada')}</div>
-                <div><strong class="marker-label">Tipo:</strong> ${escapeHtml(markerData.building_type || 'No especificado')}</div>
-                <div><strong class="marker-label">Estado:</strong> ${escapeHtml(markerData.status || 'No especificado')}</div>
-                <div><strong class="marker-label">Actualizado:</strong> ${escapeHtml(markerData.updated_on || 'No especificado')}</div>
-              </div>
-              <div class="marker-actions">
-                <a href="https://www.google.com/maps?q=${lat},${lng}" target="_blank" class="marker-button">
-                  Ver en Google Maps
-                </a>
-                <a href="/issues/${markerData.id}" class="marker-button">
-                  Ver Censo
-                </a>
-              </div>
+          <div class="marker-info">
+            <h3>Censo #${markerData.id}</h3>
+            <div class="marker-info-content">
+              <div><strong class="marker-label">Localidad:</strong> ${escapeHtml(markerData.location || 'No especificada')}</div>
+              <div><strong class="marker-label">Dirección:</strong> ${escapeHtml(markerData.address || 'No especificada')}</div>
+              <div><strong class="marker-label">Tipo:</strong> ${escapeHtml(markerData.building_type || 'No especificado')}</div>
+              <div><strong class="marker-label">Estado:</strong> ${escapeHtml(markerData.status || 'No especificado')}</div>
             </div>
-          `;
+            <div class="marker-actions">
+              <a href="https://www.google.com/maps?q=${lat},${lng}" target="_blank" class="marker-button">
+                Obtener ubicación
+              </a>
+              <a href="/issues/${markerData.id}" class="marker-button">
+                Ver Censo
+              </a>
+            </div>
+          </div>
+        `;
           
           marker.bindPopup(popupContent);
           marker.addTo(markersLayer);
@@ -137,7 +137,14 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     }
     
+    let currentAlertMessage = null;
+
     function showErrorMessage(message) {
+      // Eliminar mensaje anterior si existe
+      if (currentAlertMessage) {
+        currentAlertMessage.remove();
+      }
+    
       const errorDiv = document.createElement('div');
       errorDiv.className = 'alert alert-error';
       errorDiv.style.cssText = 'margin:10px;padding:10px;background:#fee;border:1px solid #fcc;border-radius:4px;color:#333;';
@@ -146,8 +153,18 @@ document.addEventListener('DOMContentLoaded', function() {
       const mapElement = document.getElementById('censo-map');
       if (mapElement) {
         mapElement.parentNode.insertBefore(errorDiv, mapElement);
+        currentAlertMessage = errorDiv;
       }
+    
+      // Auto-eliminar después de 5 segundos
+      setTimeout(() => {
+        if (errorDiv.parentNode) {
+          errorDiv.remove();
+          currentAlertMessage = null;
+        }
+      }, 5000);
     }
+    
     
     function escapeHtml(unsafe) {
       if (!unsafe) return '';
@@ -160,31 +177,33 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     window.applyFilters = function() {
-      try {
-        const locationFilter = document.getElementById('location-filter').value;
-        const buildingTypeFilter = document.getElementById('building-type-filter').value;
-        const addressFilter = document.getElementById('address-filter').value.toLowerCase();
-        const titleFilter = document.getElementById('title-filter').value.toLowerCase();
-        
-        const filteredMarkers = mapMarkers.filter(marker => {
-          const locationMatch = !locationFilter || marker.location === locationFilter;
-          const buildingTypeMatch = !buildingTypeFilter || marker.building_type === buildingTypeFilter;
-          const addressMatch = !addressFilter || (marker.address && marker.address.toLowerCase().includes(addressFilter));
-          const titleMatch = !titleFilter || (marker.title && marker.title.toLowerCase().includes(titleFilter));
+        try {
+          const locationFilter = document.getElementById('location-filter').value;
+          const buildingTypeFilter = document.getElementById('building-type-filter').value;
+          const addressFilter = document.getElementById('address-filter').value.toLowerCase();
+          const statusFilter = document.getElementById('status-filter').value;
+          const numeroFilter = document.getElementById('title-filter').value;
           
-          return locationMatch && buildingTypeMatch && addressMatch && titleMatch;
-        });
-        
-        if (filteredMarkers.length === 0) {
-          showErrorMessage('No se encontraron resultados para los filtros aplicados.');
+          const filteredMarkers = mapMarkers.filter(marker => {
+            const locationMatch = !locationFilter || marker.location === locationFilter;
+            const buildingTypeMatch = !buildingTypeFilter || marker.building_type === buildingTypeFilter;
+            const addressMatch = !addressFilter || (marker.address && marker.address.toLowerCase().includes(addressFilter));
+            const statusMatch = !statusFilter || marker.status_id.toString() === statusFilter;
+            const numeroMatch = !numeroFilter || marker.id.toString() === numeroFilter;
+            
+            return locationMatch && buildingTypeMatch && addressMatch && statusMatch && numeroMatch;
+          });
+          
+          if (filteredMarkers.length === 0) {
+            showErrorMessage('No se encontraron resultados para los filtros aplicados.');
+          }
+          
+          displayMarkers(filteredMarkers);
+        } catch (error) {
+          console.error('Error al aplicar filtros:', error);
+          showErrorMessage('Error al aplicar los filtros. Por favor, inténtalo de nuevo.');
         }
-        
-        displayMarkers(filteredMarkers);
-      } catch (error) {
-        console.error('Error al aplicar filtros:', error);
-        showErrorMessage('Error al aplicar los filtros. Por favor, inténtalo de nuevo.');
       }
-    }
     
     window.resetFilters = function() {
       try {
