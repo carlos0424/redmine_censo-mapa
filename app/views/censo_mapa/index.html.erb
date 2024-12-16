@@ -1,0 +1,70 @@
+<% content_for :header_tags do %>
+    <%= stylesheet_link_tag 'censo_mapa', plugin: 'redmine_censo_mapa' %>
+    <%= stylesheet_link_tag 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css' %>
+    <%= javascript_include_tag 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js' %>
+    <%= javascript_include_tag 'censo_mapa', plugin: 'redmine_censo_mapa' %>
+  <% end %>
+  
+  <div class="censo-mapa-container">
+    <div class="censo-mapa-header">
+      <div class="censo-mapa-filters">
+        <div class="filter-group">
+          <label>Localidad:</label>
+          <select id="location-filter" class="filter-select">
+            <option value="">Todas</option>
+            <% @unique_locations.each do |location| %>
+              <option value="<%= location %>"><%= location %></option>
+            <% end %>
+          </select>
+        </div>
+  
+        <div class="filter-group">
+          <label>Tipo de Predio:</label>
+          <select id="building-type-filter" class="filter-select">
+            <option value="">Todos</option>
+            <% @unique_types.each do |type| %>
+              <option value="<%= type %>"><%= type %></option>
+            <% end %>
+          </select>
+        </div>
+  
+        <div class="filter-group">
+          <label>Dirección:</label>
+          <input type="text" id="address-filter" class="filter-input" placeholder="Buscar...">
+        </div>
+  
+        <div class="filter-actions">
+          <button onclick="applyFilters()" class="filter-button">
+            <%= image_tag('search.png', plugin: 'redmine_censo_mapa', class: 'button-icon') %>
+            Buscar
+          </button>
+          <button onclick="resetFilters()" class="filter-button reset">
+            <%= image_tag('reset.png', plugin: 'redmine_censo_mapa', class: 'button-icon') %>
+            Limpiar
+          </button>
+        </div>
+      </div>
+      
+      <div class="censo-count">
+        Total Censos Activos: <span id="censo-counter"><%= @issues.count %></span>
+      </div>
+    </div>
+  
+    <div id="censo-map"></div>
+  </div>
+  
+  <script type="text/javascript">
+    var mapMarkers = <%= raw(@issues.map { |issue|
+      {
+        id: issue.id,
+        lat: issue.custom_field_value(@custom_field_ids[:latitud]),
+        lng: issue.custom_field_value(@custom_field_ids[:longitud]),
+        title: issue.subject,
+        location: issue.custom_field_value(@custom_field_ids[:localidad]),
+        address: issue.custom_field_value(@custom_field_ids[:direccion]),
+        building_type: issue.custom_field_value(@custom_field_ids[:tipo_predio]),
+        status: issue.status.name,
+        updated_on: format_time(issue.updated_on)
+      }
+    }.to_json) %>;
+  </script>
