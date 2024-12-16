@@ -22,4 +22,4 @@ Plugin desarrollado para visualizar en mapa las ubicaciones de los censos regist
 1. Clonar el repositorio en la carpeta plugins de Redmine:
 ```bash
 cd /path/to/redmine/plugins
-git clone https://github.com/carlos0424/redmine_censo-mapa.git
+git clone https://github.com/carlos0424/redmine_censo_mapa.git
